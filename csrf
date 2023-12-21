@@ -1,0 +1,45 @@
+// genaration du token 
+<?php
+session_start(); // Assurez-vous que les sessions sont activées
+
+function generateCSRFToken() {
+    $token = bin2hex(random_bytes(32)); // Génère un token aléatoire (32 octets en hexadécimal)
+
+    // Stockez le token dans la session pour une vérification ultérieure
+    $_SESSION['csrf_token'] = $token;
+
+    return $token;
+}
+
+// Utilisez cette fonction pour insérer le jeton dans le formulaire
+function echoCSRFTokenField() {
+    $token = generateCSRFToken();
+    echo '<input type="hidden" name="csrf_token" value="' . $token . '">';
+}
+?>
+//
+<?php
+session_start(); // Assurez-vous que les sessions sont activées
+//confirmation du token coté serveur 
+function verifyCSRFToken($token) {
+    // Vérifiez si le token passé en paramètre correspond à celui stocké dans la session
+    return isset($_SESSION['csrf_token']) && $token === $_SESSION['csrf_token'];
+}
+
+// Utilisez cette fonction pour vérifier le jeton lors du traitement du formulaire
+function handleFormSubmission() {
+    $userToken = $_POST['csrf_token']; // Assurez-vous que vous récupérez le jeton du formulaire
+
+    // Vérifiez le jeton anti-CSRF
+    if (verifyCSRFToken($userToken)) {
+        // Le jeton est valide, continuez avec le traitement du formulaire
+        // ...
+        echo "Le formulaire a été soumis avec succès!";
+    } else {
+        // Le jeton est invalide, traiter l'erreur (par exemple, afficher un message d'erreur)
+        // ...
+        echo "Erreur: Jeton CSRF invalide!";
+    }
+}
+?>
+
